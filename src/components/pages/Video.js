@@ -1,34 +1,39 @@
 import { useParams } from "react-router-dom";
+import { useGetVideoQuery } from "../../features/api/apiSlice";
+import Error from "../ui/Error";
+import DescriptionLoader from "../ui/loaders/DescriptionLoader";
+import PlayerLoader from "../ui/loaders/PlayerLoader";
+import RelatedVideoLoader from "../ui/loaders/RelatedVideoLoader";
 import Description from "../video/Description";
 import Player from "../video/Player";
 import RelatedVideos from "../video/related/RelatedVideos";
-import { useGetVideoQuery } from "../../features/api/apiSlice";
-import PlayerLoader from "../ui/loaders/PlayerLoader"
-import DescriptionLoader from "../ui/loaders/DescriptionLoader"
-import Error from "../ui/Error"
-import RelatedVideoLoader from "../ui/loaders/RelatedVideoLoader"
 
 export default function Video() {
     const { videoId } = useParams();
     const { data: video, isLoading, isError } = useGetVideoQuery(videoId);
 
     let content = null;
-
     if (isLoading) {
-        content = <><PlayerLoader /> <DescriptionLoader /></>
+        content = (
+            <>
+                <PlayerLoader />
+                <DescriptionLoader />
+            </>
+        );
     }
 
     if (!isLoading && isError) {
-        content = <Error message="There was an error" />
+        content = <Error message="There was an error!" />;
     }
 
     if (!isLoading && !isError && video?.id) {
-        content = <>
-            <Player title={video.title} link={video.link} />
-            <Description video={video} />
-        </>
+        content = (
+            <>
+                <Player link={video.link} title={video.title} />
+                <Description video={video} />
+            </>
+        );
     }
-
 
     return (
         <section className="pt-6 pb-20 min-h-[calc(100vh_-_157px)]">
@@ -38,7 +43,17 @@ export default function Video() {
                         {content}
                     </div>
 
-                    {video?.id ? <RelatedVideos /> : isLoading ? <RelatedVideoLoader /> : <Error message="There was an error" />}
+                    {video?.id ? (
+                        <RelatedVideos id={video.id} title={video.title} />
+                    ) : isLoading ? (
+                        <>
+                            <RelatedVideoLoader />
+                            <RelatedVideoLoader />
+                            <RelatedVideoLoader />
+                        </>
+                    ) : (
+                        <Error message="There was an error!" />
+                    )}
                 </div>
             </div>
         </section>
